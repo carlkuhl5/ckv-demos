@@ -1,0 +1,11 @@
+<svg viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="W&amp;W Pressure Washing">
+<circle cx="32" cy="32" r="30" fill="#FFFFFF"/>
+<circle cx="32" cy="32" r="30" fill="none" stroke="#0B2242" stroke-width="3.5"/>
+<circle cx="32" cy="32" r="24.5" fill="none" stroke="#0B2242" stroke-width="1.2" opacity=".45"/>
+<path d="M17.5 47.5 33 32" stroke="#0B2242" stroke-width="5" stroke-linecap="round"/>
+<path d="m20.5 44.5 4 4" stroke="#0B2242" stroke-width="7" stroke-linecap="round"/>
+<path d="M31.5 30.5 36 35" stroke="#0B2242" stroke-width="7.5" stroke-linecap="round"/>
+<path d="M38 24c3.6-1.6 7.4-2.1 11.4-1.5M40.2 30.4c3.4-.2 6.7.5 9.8 2.1M35.4 18.6c2-2.6 4.5-4.6 7.6-6"
+      stroke="#12A9E0" stroke-width="3.2" stroke-linecap="round"/>
+<circle cx="52.5" cy="17.5" r="2.4" fill="#12A9E0"/>
+</svg>

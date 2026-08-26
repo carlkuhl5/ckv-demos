@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+# Owner CRM is private — never index it
+Disallow: /crm/
+
+Sitemap: https://wwpressurewashing.com/sitemap.xml
