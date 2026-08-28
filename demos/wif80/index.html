@@ -169,9 +169,16 @@ section,header.hero,footer.foot{position:relative;overflow:hidden;isolation:isol
 [data-anim="arch"]{transform:translate3d(0,40px,0) scale(.94);clip-path:inset(0 0 100% 0)}
 [data-anim="mask"]{clip-path:inset(0 0 108% 0);transform:translate3d(0,.18em,0)}
 [data-anim="blur"]{filter:blur(9px);transform:translate3d(0,18px,0)}
-[data-anim].in{
-  opacity:1;transform:none;filter:none;clip-path:inset(0 0 -20% 0);
-}
+[data-anim].in{opacity:1;transform:none;filter:none}
+/* release the compositor layer once the reveal is done — leaving will-change on
+   permanently pins a layer per element for the life of the page */
+[data-anim].revealed{will-change:auto}
+/* Only "mask" and "arch" ever set a clip-path, so only they need one to animate
+   back to. Applying it to every variant was clipping content that legitimately
+   renders outside the box: a hovered .btn lifts 3px above its wrapper, and
+   .ph-chip overhangs .rsvp-shell by 13px. Both wrappers are "up". */
+[data-anim="mask"].in,[data-anim="arch"].in{clip-path:inset(0 0 -20% 0)}
+[data-anim="mask"].revealed,[data-anim="arch"].revealed{clip-path:none}
 
 /* ============================================================
    FINE-LINE TEXTURE — guilloché, borrowed from currency engraving
@@ -499,7 +506,7 @@ section,header.hero,footer.foot{position:relative;overflow:hidden;isolation:isol
 }
 @media (max-width:600px){.rsvp-shell{min-height:600px}}
 .ph-chip{
-  position:absolute;top:-13px;left:clamp(18px,4vw,34px);
+  position:absolute;top:-13px;left:clamp(18px,4vw,34px);z-index:3;white-space:nowrap;
   background:var(--harvest);color:var(--ocean);
   font-size:.62rem;font-weight:800;letter-spacing:.2em;text-transform:uppercase;
   padding:6px 14px;border-radius:999px;
@@ -861,7 +868,7 @@ section,header.hero,footer.foot{position:relative;overflow:hidden;isolation:isol
 }
 
 /* standalone inline links get a real tap area — the audience skews older (PRD 03) */
-.dl .note a,.foot a,.ph-note a,.noresult a{display:inline-block;padding:11px 0}
+.dl .note a:not(.btn),.foot a:not(.btn),.ph-note a:not(.btn),.noresult a:not(.btn){display:inline-block;padding:11px 0}
 .foot-bot a{padding:0}
 </style>
 </head>
@@ -1528,8 +1535,29 @@ var $$ = function(s,c){return Array.prototype.slice.call((c||document).querySele
 
 /* ---------- reveal on scroll ---------- */
 var revealTargets = $$('[data-anim], .wave, .sched, .sig, .rings, .dl li');
+
+/* Once a reveal has finished, drop its clip-path and release its compositor
+   layer. A lingering clip-path cuts off anything rendering outside the box
+   afterwards (hover lift, focus rings, the RSVP chip); a lingering will-change
+   pins a GPU layer per element for the life of the page. */
+function settle(el){
+  if(!el.hasAttribute('data-anim')) return;
+  var v = el.getAttribute('data-anim');
+  var clipped = (v === 'mask' || v === 'arch');   /* the only two that animate clip-path */
+  var done = function(ev){
+    /* a clipped reveal must wait for clip-path itself — opacity finishes first and
+       dropping the clip early would snap the mask open */
+    if(ev && clipped && ev.propertyName !== 'clip-path') return;
+    el.classList.add('revealed');
+    el.removeEventListener('transitionend', done);
+    clearTimeout(t);
+  };
+  var d = parseFloat(el.style.getPropertyValue('--d')) || 0;
+  var t = setTimeout(done, 1400 + d);      /* fallback if transitionend never fires */
+  el.addEventListener('transitionend', done);
+}
 if(reduced || !('IntersectionObserver' in window)){
-  revealTargets.forEach(function(el){el.classList.add('in')});
+  revealTargets.forEach(function(el){el.classList.add('in');el.classList.add('revealed')});
 }else{
   var io = new IntersectionObserver(function(entries){
     entries.forEach(function(e){
@@ -1537,6 +1565,7 @@ if(reduced || !('IntersectionObserver' in window)){
          (refresh mid-page, deep link, back navigation) */
       if(e.isIntersecting || e.boundingClientRect.top < 0){
         e.target.classList.add('in'); io.unobserve(e.target);
+        settle(e.target);
       }
     });
   },{rootMargin:'0px 0px -12% 0px',threshold:0});   /* threshold must stay 0: a clip-path
@@ -1545,7 +1574,7 @@ if(reduced || !('IntersectionObserver' in window)){
 
   /* hero fires immediately — nothing above the fold should wait on scroll */
   requestAnimationFrame(function(){
-    $$('.hero [data-anim], .hero .line, #archwin').forEach(function(el){el.classList.add('in')});
+    $$('.hero [data-anim], .hero .line, #archwin').forEach(function(el){el.classList.add('in');settle(el)});
     document.body.classList.add('hero-ready');
   });
 }
