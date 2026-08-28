@@ -329,15 +329,20 @@ section,header.hero,footer.foot{position:relative;overflow:hidden;isolation:isol
 
 .h-eighty{color:var(--stone)}
 .h-onward{color:var(--green-tint)}
-.h-script{
-  display:block;font-family:var(--script);font-size:clamp(2.4rem,9vw,5.2rem);
-  color:var(--green);text-transform:none;letter-spacing:0;
-  /* Parisienne's ascenders and swashes overrun a normal line box. .line clips to
-     its content box for the mask reveal, so the glyphs need room INSIDE it —
-     the optical tuck goes on the wrapper instead, where nothing clips it. */
-  line-height:1.34;padding:.04em 0 .2em;
+/* The reveal mask on .line clips BOTH axes, so the script needs room inside it on
+   every side: Parisienne's ascenders overrun the line box vertically, and the
+   leading 'a' swash sits ~0.034em left of the text origin. Padding gives that room;
+   the wrapper's negative margins cancel it so the optical alignment is unchanged.
+   The size lives on the wrapper so both sets of em values resolve identically. */
+.line-script{
+  font-size:clamp(2.4rem,9vw,5.2rem);
+  margin-top:-.2em;margin-left:-.1em;
 }
-.line-script{margin-top:-.2em}
+.h-script{
+  display:block;font-family:var(--script);font-size:1em;
+  color:var(--green);text-transform:none;letter-spacing:0;
+  line-height:1.34;padding:.04em 0 .2em .1em;
+}
 .hero-sub{
   margin-top:clamp(18px,3vw,26px);
   font-size:clamp(1.02rem,2.4vw,1.24rem);font-weight:600;line-height:1.5;
@@ -842,8 +847,7 @@ section,header.hero,footer.foot{position:relative;overflow:hidden;isolation:isol
   .hero-grid{gap:26px}
   .wifmark{width:84px;margin-bottom:16px}
   .h-xl{font-size:clamp(2.15rem,9.4vw,3rem)}
-  .h-script{font-size:clamp(2rem,8.6vw,2.7rem)}
-  .line-script{margin-top:-.16em}
+  .line-script{font-size:clamp(2rem,8.6vw,2.7rem);margin-top:-.16em}
   .hero-sub{margin-top:14px;font-size:1rem}
   .hero-cta{gap:10px;margin-top:20px}
   .hero-cta .btn{flex:1 1 auto;min-width:0;padding:15px 18px;font-size:.86rem;letter-spacing:.04em}
@@ -871,7 +875,7 @@ section,header.hero,footer.foot{position:relative;overflow:hidden;isolation:isol
 }
 @media (max-width:380px){
   .h-xl{font-size:2.05rem}
-  .h-script{font-size:1.95rem}
+  .line-script{font-size:1.95rem}
   .hero-cta .btn{font-size:.8rem;padding:15px 14px}
 }
 
