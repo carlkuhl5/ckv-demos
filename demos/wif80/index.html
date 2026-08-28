@@ -42,7 +42,10 @@
   --stone-shade:#E2E2CB;
   --stone:#F7F7F1;
 
-  --display:"Bodoni Moda",Didot,"Playfair Display",Georgia,serif;
+  /* Didot Bold is the style guide face. It ships with macOS and iOS, so naming it
+     here renders the real thing for Mac/iPhone viewers with no embedding. Windows
+     and Android fall back to Bodoni Moda until a licensed Didot webfont is supplied. */
+  --display:Didot,"Didot LT STD","Bodoni Moda",Georgia,serif;
   --sans:"Archivo","Helvetica Neue",Arial,sans-serif;
   --script:"Parisienne",cursive;
 
