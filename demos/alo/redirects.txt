@@ -1,0 +1,24 @@
+# Redirect map — associationlo.org rebuild
+# PRD Section 12: every existing URL maps to a named equivalent. No blanket
+# redirect to the homepage. Verified before DNS cutover (PRD Section 14, Test).
+#
+# FROM                               CODE NEW                                      NOTE
+/                                  301  /                                        unchanged
+/about                             301  /about.html                              leadership split to its own page
+/members                           301  /membership.html                         
+/become-a-member                   301  /membership/join.html                    one of three duplicate join paths
+/plans-pricing                     301  /membership/join.html                    second duplicate join path
+/events                            301  /events.html                             canonical of the two event pages
+/copy-of-events-a-la-carte         301  /events.html                             editor artifact, duplicate content
+/gallery                           301  /events/past-events.html                 
+/bourbon-raffle                    301  /events/bourbon-raffle.html              
+/young-artist                      301  /young-artists.html                      
+/young-artist-requirements         301  /young-artists/compete.html              
+/yac-announcement-2025             301  /young-artists/compete.html              mislabelled: contained 2026 announcement
+/copy-of-yac-entry-form            301  /young-artists/apply.html                editor artifact
+/yac-application                   301  /young-artists/apply.html                
+/2022youngartistwinnersalo         301  /young-artists/winners.html#2023         URL year did not match content year
+/donate                            301  /donate.html                             
+/copy-of-usd50-donate-form         301  /donate.html                             editor artifact
+/contact                           301  /contact.html                            
+/terms-and-conditions              301  /terms.html                              demoted from top-level nav to footer
