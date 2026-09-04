@@ -944,7 +944,10 @@ legend { padding: 0; font-family: var(--f-display); font-size: 1.28rem; font-wei
 
 /* Opt-in entrance for above-the-fold content, which never waits on an
    observer — it plays the moment the page paints. */
-.rise { animation: rise .9s var(--ease) both; animation-delay: var(--d, 0s); }
+/* .75s with delays topping out at .42s means the hero has fully settled a
+   little over a second in — long enough to read as deliberate, short enough
+   that nobody is waiting on the call to action. */
+.rise { animation: rise .75s var(--ease) both; animation-delay: var(--d, 0s); }
 
 /* ----------------------------------------------------- hero: living image */
 /* A slow push on the hero plate. 32s is deliberately past the point where the
