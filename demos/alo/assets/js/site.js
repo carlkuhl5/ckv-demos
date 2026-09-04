@@ -53,10 +53,49 @@
   }
 
   /* ---------------------------------------------------------- reveal */
+  // Blocks that read better arriving in sequence than all at once. Tagged
+  // here rather than in the generator so the markup stays about structure and
+  // this file stays the single place motion is decided.
+  var REVEAL_GROUPS = [
+    ".section-head", ".card", ".tier", ".basket", ".person",
+    ".archive-item", ".pillar", ".steps li", ".table-wrap"
+  ];
+
   function initReveal() {
+    if (reduceMotion || !("IntersectionObserver" in window)) return;
+
+    // A hidden document runs no frames, so a CSS transition started now would
+    // freeze part-way and leave content half-visible. Hide nothing until the
+    // page is actually being looked at.
+    if (document.visibilityState === "hidden") {
+      document.addEventListener("visibilitychange", function once() {
+        if (document.visibilityState !== "visible") return;
+        document.removeEventListener("visibilitychange", once);
+        initReveal();
+      });
+      return;
+    }
+
+    REVEAL_GROUPS.forEach(function (sel) {
+      $$(sel).forEach(function (el) {
+        // Never hide anything a visitor is mid-transaction inside.
+        if (el.closest(".checkout-form") || el.closest(".summary")) return;
+        el.classList.add("reveal");
+      });
+    });
+
+    // Stagger within each parent, so a row of three cards arrives left to
+    // right and a grid of twelve does not turn into a wave.
+    var seen = new Map();
+    $$(".reveal").forEach(function (el) {
+      var key = el.parentElement;
+      var i = (seen.get(key) || 0);
+      seen.set(key, i + 1);
+      el.style.setProperty("--i", Math.min(i, 6));
+    });
+
     var items = $$(".reveal");
     if (!items.length) return;
-    if (reduceMotion || !("IntersectionObserver" in window)) return;
 
     // Only now, with the observer about to be attached, is it safe to hide
     // anything. Everything below is guaranteed to get its "in" class back.
@@ -74,23 +113,47 @@
     // paths — and a reveal that never fires is content the reader never sees.
     // This sweep runs on a plain timer and on scroll, independent of the
     // observer, so nothing can stay stuck at opacity 0.
+    function done() {
+      window.removeEventListener("scroll", sweep);
+      clearInterval(timer);
+      clearTimeout(deadline);
+    }
+
     function sweep() {
+      // innerHeight reads 0 in a suppressed renderer, which would make the
+      // test below reveal nothing at all. Floor it.
+      var vh = Math.max(window.innerHeight || 0,
+                        document.documentElement.clientHeight || 0, 600);
       var pending = false;
       items.forEach(function (el) {
         if (el.classList.contains("in")) return;
-        if (el.getBoundingClientRect().top < window.innerHeight * 1.25) {
-          el.classList.add("in");
-        } else { pending = true; }
+        if (el.getBoundingClientRect().top < vh * 1.25) el.classList.add("in");
+        else pending = true;
       });
-      if (!pending) {
-        window.removeEventListener("scroll", onScroll);
-        clearInterval(timer);
-      }
+      if (!pending) done();
     }
-    var onScroll = function () { requestAnimationFrame(sweep); };
-    var timer = setInterval(sweep, 900);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    setTimeout(sweep, 900);
+
+    var timer = setInterval(sweep, 700);
+    window.addEventListener("scroll", sweep, { passive: true });
+    setTimeout(sweep, 400);
+
+    // Hard deadline. Whatever went wrong — no observer, no layout, a
+    // suppressed renderer — everything is visible three seconds in. There is
+    // no state this site can reach where content stays at opacity 0.
+    var deadline = setTimeout(function () {
+      items.forEach(function (el) { el.classList.add("in"); });
+      done();
+      // Last resort. If anything is still part-way through a transition that
+      // is never going to finish, drop the whole layer: without .js-reveal on
+      // the root, .reveal has no opacity rule at all and the page is simply
+      // visible. Better a missing animation than missing content.
+      setTimeout(function () {
+        var stuck = items.some(function (el) {
+          return parseFloat(getComputedStyle(el).opacity) < 1;
+        });
+        if (stuck) document.documentElement.classList.remove("js-reveal");
+      }, 500);
+    }, 3000);
   }
 
   /* -------------------------------------------------------- steppers */
@@ -482,6 +545,87 @@
     }
   }
 
+  /* --------------------------------------------------------- count-up */
+  /* Numbers are the argument on this site — $2.9 million, 350 members, 82
+     years. Counting them up makes a reader look at the figure instead of
+     skimming past it. Runs once, when the number scrolls into view. */
+  function initCountUp() {
+    var els = $$("[data-countup]");
+    if (!els.length) return;
+
+    function paint(el, value) {
+      var dec = parseInt(el.getAttribute("data-decimals") || "0", 10);
+      var body = value.toLocaleString("en-US", {
+        minimumFractionDigits: dec, maximumFractionDigits: dec
+      });
+      el.textContent = (el.getAttribute("data-prefix") || "") + body +
+                       (el.getAttribute("data-suffix") || "");
+    }
+
+    function run(el) {
+      var target = parseFloat(el.getAttribute("data-countup"));
+      if (isNaN(target)) return;
+      paint(el, 0);
+      var dur = parseInt(el.getAttribute("data-duration") || "1400", 10);
+      var start = null;
+      function frame(t) {
+        if (start === null) start = t;
+        var p = Math.min(1, (t - start) / dur);
+        // ease-out cubic: fast to begin, settling onto the real figure
+        paint(el, target * (1 - Math.pow(1 - p, 3)));
+        if (p < 1) requestAnimationFrame(frame);
+        else paint(el, target);
+      }
+      requestAnimationFrame(frame);
+    }
+
+    // The build writes the real figure into the markup, so the page is
+    // correct with no JavaScript, in a background tab, and in print. Zeroing
+    // it here and waiting for an observer would mean a reader who never
+    // triggers one sees "$0.0M" — strictly worse than no animation at all.
+    if (reduceMotion || document.visibilityState === "hidden" ||
+        !("IntersectionObserver" in window)) return;
+
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        io.unobserve(en.target);
+        run(en.target);
+      });
+    }, { threshold: 0.4 });
+    els.forEach(function (el) { io.observe(el); });
+  }
+
+  /* ------------------------------------------------- header on scroll */
+  function initHeader() {
+    var header = $(".site-header");
+    if (!header) return;
+    var last = 0;
+    function sync() {
+      last = Date.now();
+      header.classList.toggle("scrolled", window.scrollY > 24);
+    }
+    window.addEventListener("scroll", function () {
+      // Timestamp throttle rather than rAF: requestAnimationFrame does not
+      // fire in a suppressed renderer, and a header stuck in the wrong state
+      // is a visible bug.
+      if (Date.now() - last > 80) sync();
+    }, { passive: true });
+    sync();
+  }
+
+  /* --------------------------------------------------------- scroll cue */
+  function initScrollCue() {
+    var cue = $(".scroll-cue");
+    if (!cue) return;
+    cue.addEventListener("click", function () {
+      var target = $(cue.getAttribute("data-target"));
+      if (target) {
+        target.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+      }
+    });
+  }
+
   /* ------------------------------------------------------------ init */
   function boot() {
     initNav();
@@ -492,6 +636,9 @@
     initDivisions();
     initFilters();
     initPrefill();
+    initCountUp();
+    initHeader();
+    initScrollCue();
     var y = $("[data-year]");
     if (y) y.textContent = new Date().getFullYear();
   }

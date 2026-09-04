@@ -901,3 +901,202 @@ legend { padding: 0; font-family: var(--f-display); font-size: 1.28rem; font-wei
 }
 .countdown.countdown-pending strong { color: var(--brass-400); }
 .countdown.countdown-pending p { margin: 0; }
+
+/* ==========================================================================
+   MOTION
+   --------------------------------------------------------------------------
+   Everything below is layered on top of a design that reads correctly with
+   none of it running. Two rules govern all of it:
+
+     1. Only `transform` and `opacity` animate. Nothing here triggers layout,
+        so a mid-range Android phone stays at 60fps.
+     2. `prefers-reduced-motion` switches the whole layer off, not down.
+
+   The PRD (Section 05) asks for restrained motion, and the association's
+   membership skews well over 65 — so the brief for this layer is "the page
+   feels alive when it loads and when you scroll", not "things fly in from
+   the sides."
+   ========================================================================== */
+
+/* ------------------------------------------------------- the kill switch */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ------------------------------------------------------------- entrances */
+@keyframes rise {
+  from { opacity: 0; transform: translate3d(0, 26px, 0); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes drawline {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+/* Opt-in entrance for above-the-fold content, which never waits on an
+   observer — it plays the moment the page paints. */
+.rise { animation: rise .9s var(--ease) both; animation-delay: var(--d, 0s); }
+
+/* ----------------------------------------------------- hero: living image */
+/* A slow push on the hero plate. 32s is deliberately past the point where the
+   eye can track it: you notice the hero is not a flat image, without ever
+   catching it moving. */
+@keyframes kenburns {
+  from { transform: scale(1.05) translate3d(0, 0, 0); }
+  to   { transform: scale(1.16) translate3d(-1.6%, -1.4%, 0); }
+}
+.hero .hero-bg {
+  transform-origin: 64% 42%;
+  animation: kenburns 32s var(--ease) infinite alternate;
+  will-change: transform;
+}
+.page-hero .hero-bg {
+  transform-origin: 60% 45%;
+  animation: kenburns 44s var(--ease) infinite alternate;
+}
+
+/* A warm bloom that breathes behind the headline, so the dark left-hand side
+   of the hero is not dead space. */
+@keyframes bloom {
+  0%, 100% { opacity: .34; transform: translate3d(0, 0, 0) scale(1); }
+  50%      { opacity: .58; transform: translate3d(2%, -3%, 0) scale(1.14); }
+}
+.hero::before {
+  content: "";
+  position: absolute; z-index: 1;
+  top: -18%; left: -14%; width: 62%; height: 116%;
+  background: radial-gradient(ellipse at center,
+              rgba(203,164,106,.30) 0%, rgba(203,164,106,.10) 42%, transparent 70%);
+  animation: bloom 14s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* --------------------------------------------------- the equalizer motif */
+/* Eight bars on a staggered loop. This is the one purely decorative element
+   on the site, and it earns its place by being the thing that says "music"
+   before a word is read. */
+.equalizer {
+  display: flex; align-items: flex-end; gap: 4px;
+  height: 30px; margin-bottom: 1.5rem;
+}
+.equalizer i {
+  display: block; width: 4px; height: 100%;
+  background: linear-gradient(to top, rgba(203,164,106,.35), var(--brass-400));
+  border-radius: 2px; transform-origin: bottom;
+  transform: scaleY(var(--h, .4));
+  animation: eq var(--dur, 1.5s) ease-in-out var(--delay, 0s) infinite alternate;
+}
+@keyframes eq {
+  from { transform: scaleY(var(--h, .35)); opacity: .55; }
+  to   { transform: scaleY(var(--h2, 1)); opacity: 1; }
+}
+
+/* ---------------------------------------------------------- scroll cue */
+@keyframes nudge {
+  0%, 100% { transform: translateY(0); opacity: .55; }
+  50%      { transform: translateY(6px); opacity: 1; }
+}
+.scroll-cue {
+  display: inline-flex; align-items: center; gap: .5rem;
+  min-height: 44px;                    /* PRD 11 — it is a real control */
+  margin-top: 1.8rem; font-size: .74rem; letter-spacing: .16em;
+  text-transform: uppercase; font-weight: 700; color: var(--on-dark-soft);
+  background: none; border: 0; cursor: pointer; padding: .4rem .1rem;
+}
+.scroll-cue svg { animation: nudge 2.2s ease-in-out infinite; }
+.scroll-cue:hover { color: var(--brass-400); }
+
+/* ------------------------------------------------- staggered reveal (JS) */
+/* site.js adds .reveal to card groups and section heads, then sets --i per
+   item so siblings arrive in sequence rather than all at once. */
+.js-reveal .reveal { transition-delay: calc(var(--i, 0) * 65ms); }
+
+/* The eyebrow rule draws itself in as its section arrives. */
+.eyebrow::before { transform-origin: left center; }
+.js-reveal .reveal .eyebrow::before,
+.js-reveal .reveal.eyebrow::before { transform: scaleX(0); transition: transform .7s var(--ease) calc(var(--i, 0) * 65ms + 120ms); }
+.js-reveal .reveal.in .eyebrow::before { transform: scaleX(1); }
+
+/* --------------------------------------------------------------- header */
+.site-header { transition: box-shadow .3s var(--ease), border-color .3s var(--ease); }
+.site-header.scrolled { box-shadow: 0 8px 28px rgba(20, 25, 32, .08); }
+.site-header .brand svg { transition: transform .3s var(--ease); }
+.site-header.scrolled .brand svg { transform: scale(.9); }
+.brand-sub { transition: opacity .3s var(--ease); }
+
+/* ---------------------------------------------------------------- cards */
+.event-media img { transition: transform .8s var(--ease); }
+.event-card:hover .event-media img { transform: scale(1.07); }
+.event-card .date-chip { transition: transform .3s var(--ease); }
+.event-card:hover .date-chip { transform: translateY(-2px); }
+
+.card, .tier, .basket, .person, .archive-item {
+  transition: border-color .22s var(--ease), transform .22s var(--ease);
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .tier:hover, .basket:hover, .archive-item:hover { transform: translateY(-3px); }
+  .tier:hover, .basket:hover, .archive-item:hover, .person:hover { border-color: var(--brass-500); }
+}
+.archive-item img { transition: transform .8s var(--ease); }
+.archive-item:hover img { transform: scale(1.06); }
+
+/* Arrows lead the eye toward the action they belong to. */
+.btn svg { transition: transform .25s var(--ease); }
+.btn:hover svg:last-child { transform: translateX(3px); }
+.btn:active { transform: translateY(1px); }
+
+.pillar-ico { transition: transform .3s var(--ease), background .3s var(--ease); }
+.card:hover .pillar-ico { transform: translateY(-2px) rotate(-4deg); }
+
+/* ------------------------------------------------------ progress + bars */
+/* Bars grow from zero as their card arrives, which is what makes "38 of 45
+   seats taken" register as a number worth acting on. */
+.capacity-bar i, .bar-track i, .mini-bar i {
+  width: var(--w, 0);
+  transition: width 1.1s var(--ease) calc(var(--i, 0) * 65ms + 180ms);
+}
+.js-reveal .reveal:not(.in) .capacity-bar i { width: 0; }
+
+/* --------------------------------------------------- conditional blocks */
+/* Gift details, tribute fields, and each competition division's repertoire
+   section unfold rather than appear, so it is obvious that the form grew
+   rather than that the page jumped. */
+@keyframes unfold {
+  from { opacity: 0; transform: translate3d(0, -8px, 0); }
+  to   { opacity: 1; transform: none; }
+}
+[data-reveal-when], [data-division-block], [data-custom-wrap] {
+  animation: unfold .38s var(--ease) both;
+}
+
+/* ------------------------------------------------------------ countdown */
+@keyframes tickpulse {
+  from { transform: scale(1.12); color: var(--brass-400); }
+  to   { transform: scale(1); }
+}
+.countdown div { transition: border-color .3s var(--ease); }
+.countdown .n { display: block; transform-origin: center; }
+.countdown div:last-child .n { animation: tickpulse .7s var(--ease); }
+
+/* ------------------------------------------------------------- receipts */
+@keyframes pop {
+  from { opacity: 0; transform: scale(.97) translate3d(0, 12px, 0); }
+  to   { opacity: 1; transform: none; }
+}
+.receipt { animation: pop .5s var(--ease) both; }
+
+/* --------------------------------------------------------------- toasts */
+/* (admin.css carries the toast itself; this is the shared easing.) */
+
+/* ------------------------------------------------------------ page load */
+@keyframes pagein { from { opacity: 0; } to { opacity: 1; } }
+body { animation: pagein .35s var(--ease) both; }

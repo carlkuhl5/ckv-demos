@@ -109,20 +109,26 @@
       .sort(function (a, b) { return b[1] - a[1]; });
     var max = pairs.length ? pairs[0][1] : 1;
 
-    $("#revenue-chart").innerHTML = '<div class="bars">' + pairs.map(function (p) {
-      return '<div class="bar-row"><span class="k">' + esc(p[0]) + "</span>" +
-        '<span class="bar-track"><i style="width:' + Math.max(2, p[1] / max * 100) + '%"></i></span>' +
+    $("#revenue-chart").innerHTML = '<div class="bars">' + pairs.map(function (p, i) {
+      return '<div class="bar-row" style="--i:' + i + '"><span class="k">' + esc(p[0]) + "</span>" +
+        '<span class="bar-track"><i></i></span>' +
         '<span class="v">' + money(p[1]) + "</span></div>";
     }).join("") + "</div>";
+    // Set the widths on the next frame so the bars animate out from zero
+    // rather than being painted at their final length.
+    grow("#revenue-chart", pairs.map(function (p) { return Math.max(2, p[1] / max * 100); }));
 
     var label = days >= 9999 ? "All time" : "Last " + days + " days";
     $$("[data-range-label]").forEach(function (n) { n.textContent = label; });
 
-    set("revenue", money(total), rows.length + " transactions · " + label);
-    set("members", NUM.format(DB.counts.active), DB.counts.lapsed + " lapsed, not yet renewed");
-    set("expiring", NUM.format(DB.counts.expiring), "Automated reminders already sent");
-    set("apps", NUM.format(DB.apps.length),
-      money(DB.apps.reduce(function (a, x) { return a + x.paid; }, 0)) + " in entry fees collected");
+    set("revenue", "", rows.length + " transactions · " + label);
+    countTo($('[data-tile="revenue"]'), total, money);
+    set("members", "", DB.counts.lapsed + " lapsed, not yet renewed");
+    countTo($('[data-tile="members"]'), DB.counts.active, function (v) { return NUM.format(Math.round(v)); });
+    set("expiring", "", "Automated reminders already sent");
+    countTo($('[data-tile="expiring"]'), DB.counts.expiring, function (v) { return NUM.format(Math.round(v)); });
+    set("apps", "", money(DB.apps.reduce(function (a, x) { return a + x.paid; }, 0)) + " in entry fees collected");
+    countTo($('[data-tile="apps"]'), DB.apps.length, function (v) { return NUM.format(Math.round(v)); });
 
     ["active", "expiring", "lapsed"].forEach(function (k) {
       var n = $('[data-stat="' + k + '"]');
@@ -135,17 +141,47 @@
     var mp = Object.keys(mix).map(function (k) { return [k, mix[k]]; })
       .sort(function (a, b) { return b[1] - a[1]; });
     var mmax = mp[0][1];
-    $("#member-mix").innerHTML = '<div class="bars" style="margin-bottom:1.1rem">' + mp.map(function (p) {
-      return '<div class="bar-row"><span class="k">' + esc(p[0]) + "</span>" +
-        '<span class="bar-track"><i style="width:' + Math.max(2, p[1] / mmax * 100) + '%"></i></span>' +
+    $("#member-mix").innerHTML = '<div class="bars" style="margin-bottom:1.1rem">' + mp.map(function (p, i) {
+      return '<div class="bar-row" style="--i:' + i + '"><span class="k">' + esc(p[0]) + "</span>" +
+        '<span class="bar-track"><i></i></span>' +
         '<span class="v">' + p[1] + "</span></div>";
     }).join("") + "</div>";
+    grow("#member-mix", mp.map(function (p) { return Math.max(2, p[1] / mmax * 100); }));
 
     $("#recent-orders").innerHTML = DB.orders.slice(0, 8).map(function (o) {
       return "<tr><td>" + fmtDate(o.date) + '</td><td><span class="tag">' + esc(o.type) +
         "</span></td><td>" + esc(o.name) + "</td><td>" + esc(o.detail) +
         '</td><td class="num">' + money(o.amount) + "</td></tr>";
     }).join("");
+  }
+
+  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function grow(sel, widths) {
+    var bars = $$(sel + " .bar-track i");
+    function apply() { bars.forEach(function (b, i) { b.style.width = widths[i] + "%"; }); }
+    if (reduceMotion) { apply(); return; }
+    // Double rAF is the reliable way to let the browser record the 0-width
+    // starting style before we change it. But rAF never fires in a hidden
+    // document, and a chart of zero-width bars is not an acceptable resting
+    // state — so a timer backstops it. Applying twice is harmless.
+    requestAnimationFrame(function () { requestAnimationFrame(apply); });
+    setTimeout(apply, 250);
+  }
+
+  // Tile figures count up, for the same reason the public hero stats do: the
+  // board looks at the number instead of past it.
+  function countTo(el, target, format) {
+    if (reduceMotion || !isFinite(target)) { el.textContent = format(target); return; }
+    var start = null, dur = 900;
+    function frame(t) {
+      if (start === null) start = t;
+      var p = Math.min(1, (t - start) / dur);
+      el.textContent = format(target * (1 - Math.pow(1 - p, 3)));
+      if (p < 1) requestAnimationFrame(frame);
+      else el.textContent = format(target);
+    }
+    requestAnimationFrame(frame);
   }
 
   function set(key, value, sub) {
@@ -219,7 +255,7 @@
       var tbd = !e.date;
       var pct = e.capacity ? Math.round(e.sold / e.capacity * 100) : 0;
       var cap = tbd ? '<span class="muted">—</span>' :
-        '<span class="mini-bar' + (pct >= 100 ? " full" : "") + '"><i style="width:' + pct + '%"></i></span>' +
+        '<span class="mini-bar' + (pct >= 100 ? " full" : "") + '"><i style="--w:' + pct + '%"></i></span>' +
         e.sold + " / " + e.capacity;
       var label = { open: "Selling", few: "Nearly full", soldout: "Sold out", tbd: "Date TBD" }[e.status];
       return "<tr><td><strong>" + esc(e.title) + "</strong></td><td>" +
