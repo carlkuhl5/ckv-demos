@@ -330,7 +330,7 @@ async function startVials() {
   const lowPower = navigator.connection?.saveData;
   if (reduced || lowPower) return; // composed stills stay up; nothing breaks
   try {
-    const mod = await import('./vials.js');
+    const mod = await import('./vials.js?v=3');
     if (!mod.webglAvailable()) return;
     vials = mod.initVials({
       canvas: $('.vial-canvas'),

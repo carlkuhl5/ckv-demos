@@ -75,7 +75,13 @@ function noiseTexture(size = 256, seed = 1) {
     img.data.set([v, v, v, 255], i * 4);
   }
   ctx.putImageData(img, 0, 0);
-  const t = new THREE.CanvasTexture(c);
+  // soften into a fine grain; raw per-pixel noise sparkles as the vial moves
+  const soft = document.createElement('canvas');
+  soft.width = soft.height = size;
+  const sctx = soft.getContext('2d');
+  sctx.filter = 'blur(1.5px)';
+  sctx.drawImage(c, 0, 0);
+  const t = new THREE.CanvasTexture(soft);
   t.wrapS = t.wrapT = THREE.RepeatWrapping;
   return t;
 }
@@ -103,8 +109,8 @@ function glassMaterial(side, base) {
 
 export function initVials({ canvas, products, featured, spotlight, labelCache, onReady, onVialClick }) {
   const isMobile = matchMedia('(max-width: 760px)').matches || matchMedia('(pointer: coarse)').matches;
-  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: !isMobile || devicePixelRatio < 2, powerPreference: 'high-performance' });
-  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, isMobile ? 1.5 : 2));
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: 'high-performance' });
+  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.NeutralToneMapping;
   renderer.toneMappingExposure = 1.0;
@@ -114,7 +120,7 @@ export function initVials({ canvas, products, featured, spotlight, labelCache, o
   scene.environment = studioEnvironment(renderer);
   scene.environmentIntensity = 0.85;
 
-  const camera = new THREE.PerspectiveCamera(FOV, 1, 0.1, 100);
+  const camera = new THREE.PerspectiveCamera(FOV, 1, 5, 15);
   camera.position.set(0, 0, CAM_Z);
 
   const key = new THREE.DirectionalLight(0xffffff, 1.25);
@@ -200,12 +206,12 @@ export function initVials({ canvas, products, featured, spotlight, labelCache, o
     body.scale.set(SLIM, 1, SLIM);
     g.add(body);
 
-    const puckMat = new THREE.MeshStandardMaterial({ color: product.puck, roughness: 1, bumpMap: grain, bumpScale: 1.6 });
+    const puckMat = new THREE.MeshStandardMaterial({ color: product.puck, roughness: 1, bumpMap: isMobile ? null : grain, bumpScale: 1.6 });
     const labelMat = new THREE.MeshPhysicalMaterial({
       map: getTexture(product), roughness: 0.66, clearcoat: 0.06, clearcoatRoughness: 0.5,
-      bumpMap: paperGrain, bumpScale: 0.35, sheen: 0.35, sheenRoughness: 0.9, envMapIntensity: 1.5,
+      bumpMap: isMobile ? null : paperGrain, bumpScale: 0.35, sheen: 0.35, sheenRoughness: 0.9, envMapIntensity: 1.5,
     });
-    const capMat = new THREE.MeshPhysicalMaterial({ color: product.cap, roughness: 0.58, clearcoat: 0.12, clearcoatRoughness: 0.6, sheen: 0.4, sheenRoughness: 0.7, bumpMap: grain, bumpScale: 0.45 });
+    const capMat = new THREE.MeshPhysicalMaterial({ color: product.cap, roughness: 0.58, clearcoat: 0.12, clearcoatRoughness: 0.6, sheen: 0.4, sheenRoughness: 0.7, bumpMap: isMobile ? null : grain, bumpScale: 0.45 });
 
     const glassInner = new THREE.Mesh(glassInGeo, glassIn);
     glassInner.renderOrder = 1;
@@ -346,7 +352,7 @@ export function initVials({ canvas, products, featured, spotlight, labelCache, o
       size: Math.min(G.height * 0.8, G.width * 1.5),
       lie: 0,
       rz: -0.08 * e,
-      spin: switchSpin + Math.sin(t * 0.4) * 0.3 - (1 - e) * TAU,
+      spin: switchSpin + Math.sin(t * 0.4) * 0.14 - (1 - e) * TAU,
     };
   }
 
@@ -366,12 +372,17 @@ export function initVials({ canvas, products, featured, spotlight, labelCache, o
   }
 
   // ---------- beat 4: product switcher ----------
-  // Requests during a turn are queued: the swap at the half-turn (label facing
-  // away) always uses the latest choice, so rapid clicks can't desync.
+  // Every turn ends on a whole revolution, so the label always comes to rest
+  // facing the camera. The label swap happens as the label passes the back.
+  // Requests during a turn are queued and the swap uses the latest choice; a
+  // request after the swap starts a fresh turn from wherever the vial is.
   let wanted = vials[SPOT].product;
   let switchAnim = null;
   function startSwitch(now) {
-    switchAnim = { t0: now, from: switchSpin, swapped: false };
+    const from = switchSpin;
+    let to = (Math.floor(from / TAU) + 1) * TAU;
+    if (to - from < Math.PI) to += TAU;
+    switchAnim = { t0: now, from, to, swapAt: to - Math.PI, dur: 1100 * ((to - from) / TAU) ** 0.6, swapped: false };
   }
   function switchTo(product) {
     wanted = product;
@@ -382,9 +393,10 @@ export function initVials({ canvas, products, featured, spotlight, labelCache, o
   function stepSwitch(now) {
     if (!switchAnim) return;
     const v = vials[SPOT];
-    const a = clamp((now - switchAnim.t0) / 1100);
-    switchSpin = switchAnim.from + easeInOut(a) * TAU;
-    if (!switchAnim.swapped && a >= 0.5) {
+    const { t0, from, to, swapAt, dur } = switchAnim;
+    const a = clamp((now - t0) / dur);
+    switchSpin = from + easeInOut(a) * (to - from);
+    if (!switchAnim.swapped && switchSpin >= swapAt) {
       switchAnim.swapped = true;
       v.labelMat.map = getTexture(wanted);
       v.capMat.color.set(wanted.cap);
@@ -392,7 +404,7 @@ export function initVials({ canvas, products, featured, spotlight, labelCache, o
       v.product = wanted;
     }
     if (a >= 1) {
-      switchSpin %= TAU;
+      switchSpin = 0; // `to` is a whole revolution: same pose, reset the number
       switchAnim = null;
       if (v.product.id !== wanted.id) startSwitch(now);
     }
@@ -415,12 +427,15 @@ export function initVials({ canvas, products, featured, spotlight, labelCache, o
     const hv = hover[i];
     if (!hv.anim) hv.anim = { t0: now };
   }
-  addEventListener('pointermove', (e) => {
-    if (e.pointerType === 'touch') return;
+  // Hover and click are for mouse/trackpad only. Phones and tablets get none
+  // of it, so a tap while scrolling never spins or jumps the page.
+  const finePointer = matchMedia('(hover: hover) and (pointer: fine)').matches;
+  if (finePointer) addEventListener('pointermove', (e) => {
+    if (e.pointerType !== 'mouse' && e.pointerType !== 'pen') return;
     pointer = blocked(e.target) ? null : { x: e.clientX, y: e.clientY };
   }, { passive: true });
   document.addEventListener('pointerleave', () => (pointer = null));
-  addEventListener('click', (e) => {
+  if (finePointer) addEventListener('click', (e) => {
     if (blocked(e.target)) return;
     const i = pick(e.clientX, e.clientY);
     if (i < 0) return;
