@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Merridian Research Co. — Demo Preview</title>
+  <meta name="description" content="Demo preview of the Merridian Research Co. storefront. Placeholder products, pricing and copy. For laboratory research use only." />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="theme-color" content="#000000" />
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.min.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="mark" viewBox="20 6 72 50">
+      <path d="M50 10 L65.6 19 L65.6 37 L50 46 L34.4 37 L34.4 19 Z M39 21.8 L39 34.2 M34.4 37 L24 43 L24 52 M50 46 L50 54 M65.6 37 L76 43 L76 52 M76 43 L84.6 34.4" fill="none" stroke="currentColor" stroke-width="3" />
+      <circle cx="87" cy="32" r="4.4" fill="var(--node, #58A0F2)" />
+    </symbol>
+  </svg>
+
+  <a class="skip" href="#main">Skip to content</a>
+
+  <div class="demo-bar" role="note">
+    <span class="dot" aria-hidden="true"></span>
+    <strong>Demo preview</strong>
+    <span class="demo-bar__more">Placeholder products, pricing and copy · Not a live store</span>
+  </div>
+
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="#top" aria-label="Merridian Research Co. home">
+        <svg class="brand__mark" aria-hidden="true"><use href="#mark" /></svg>
+        <span class="brand__type">
+          <span class="brand__name">MERRIDIAN</span>
+          <span class="brand__sub">RESEARCH CO.</span>
+        </span>
+      </a>
+      <nav class="primary-nav" aria-label="Primary">
+        <a href="#featured">Shop all</a>
+        <a href="#spotlight">Peptides</a>
+        <a href="#spotlight">Blends</a>
+        <a href="#testing" data-demo-page="Lab testing">Lab testing</a>
+      </nav>
+      <div class="header-actions">
+        <button class="icon-btn" type="button" data-open="search" aria-label="Search products">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="M16 16l4.5 4.5" /></svg>
+        </button>
+        <button class="icon-btn hide-sm" type="button" data-demo-page="Account" aria-label="Account">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="3.8" /><path d="M4.5 20c1.2-3.6 4-5.4 7.5-5.4s6.3 1.8 7.5 5.4" /></svg>
+        </button>
+        <button class="icon-btn cart-btn" type="button" data-open="cart" aria-label="Open cart">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1.2 12H6.2z" /><path d="M9 8V6.5a3 3 0 0 1 6 0V8" /></svg>
+          <span class="cart-count" data-cart-count>0</span>
+        </button>
+        <button class="icon-btn menu-btn" type="button" data-open="menu" aria-label="Open menu" aria-expanded="false">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h16M4 16h16" /></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <canvas class="vial-canvas" aria-hidden="true"></canvas>
+
+  <main id="main">
+    <!-- Beat 1: three vials rise beside the headline -->
+    <section class="hero" id="top">
+      <div class="wrap hero-grid">
+        <div class="hero-copy">
+          <p class="eyebrow"><span class="dot" aria-hidden="true"></span>For research use only</p>
+          <h1>Research peptides, documented to the batch.</h1>
+          <p class="lede">Every vial carries a lot number. Every lot has a third-party certificate of analysis. Specifications on every page.</p>
+          <div class="cta-row">
+            <a class="btn btn--primary" href="#featured">Shop compounds</a>
+            <a class="btn btn--ghost" href="#testing">Lab testing</a>
+          </div>
+          <dl class="hero-specs mono">
+            <div><dt>Lot</dt><dd>MR-DEMO-0080</dd></div>
+            <div><dt>Purity</dt><dd>≥99% HPLC<sup>*</sup></dd></div>
+            <div><dt>COA</dt><dd>On file</dd></div>
+          </dl>
+        </div>
+        <div class="hero-stage" aria-hidden="true">
+          <div class="hero-glow"></div>
+          <div class="hero-stills">
+            <canvas data-still="bpc-157"></canvas>
+            <canvas data-still="klow"></canvas>
+            <canvas data-still="ghk-cu"></canvas>
+          </div>
+        </div>
+      </div>
+      <p class="scroll-cue mono" aria-hidden="true"><span></span>Scroll</p>
+    </section>
+
+    <!-- Beat 2: the vials tip onto their sides and roll across -->
+    <section class="roll" id="roll" aria-label="Our standard">
+      <div class="roll-sticky">
+        <div class="roll-type" aria-hidden="true">
+          <span>SPECIFICATIONS</span>
+          <span>NOT PROMISES.</span>
+        </div>
+        <ol class="roll-points mono">
+          <li><span>01</span>Batch number on every vial</li>
+          <li><span>02</span>Third-party certificate per lot</li>
+          <li><span>03</span>Chemical data, not claims</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- Beat 3: the vials stand and land in the featured row -->
+    <section class="featured" id="featured">
+      <div class="wrap">
+        <div class="section-head">
+          <p class="eyebrow">Featured compounds</p>
+          <h2>Start with the catalog.</h2>
+          <p class="placeholder-note"><span class="tag">Placeholder</span> Products and prices are stand-ins until the client catalog is supplied.</p>
+        </div>
+        <div class="cards" data-cards></div>
+      </div>
+    </section>
+
+    <!-- Beat 4: product switcher -->
+    <section class="spotlight" id="spotlight">
+      <div class="wrap spotlight-grid">
+        <div class="spotlight-copy">
+          <p class="eyebrow">Specification sheet</p>
+          <h2 data-spot-name>KLOW <span>80mg</span></h2>
+          <div class="switcher" role="tablist" aria-label="Choose a compound" data-switcher></div>
+          <table class="spec-table mono" data-spec-table></table>
+          <div class="spot-buy">
+            <p class="spot-price"><span data-spot-price></span> <span class="stock" data-spot-stock></span></p>
+            <div class="cta-row">
+              <button class="btn btn--primary" type="button" data-spot-add>Add to cart</button>
+              <button class="btn btn--ghost" type="button" data-demo-page="Certificate of analysis (PDF)">Download COA</button>
+            </div>
+            <p class="fine">For laboratory research use only. Not for human or veterinary use.</p>
+          </div>
+        </div>
+        <div class="spotlight-stage" aria-hidden="true">
+          <div class="spot-ring"></div>
+          <canvas class="spot-still" data-still-spot></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- Trust points -->
+    <section class="trust" id="testing">
+      <div class="wrap">
+        <div class="trust-grid">
+          <article>
+            <p class="mono trust-num">01 / Purity</p>
+            <h3>Measured, then printed.</h3>
+            <p>HPLC purity is reported for each lot and printed on its certificate. <span class="tag">Placeholder figure</span></p>
+          </article>
+          <article>
+            <p class="mono trust-num">02 / Testing</p>
+            <h3>Third-party, every batch.</h3>
+            <p>An independent lab tests each batch. Certificates are searchable by product and lot number.</p>
+            <label class="coa-search">
+              <span class="sr-only">Look up a certificate by lot number</span>
+              <input type="text" class="mono" placeholder="Lot no. e.g. MR-DEMO-0080" data-coa-input />
+              <button type="button" class="btn btn--small" data-coa-btn>Find</button>
+            </label>
+            <p class="coa-result mono" data-coa-result aria-live="polite"></p>
+          </article>
+          <article>
+            <p class="mono trust-num">03 / Shipping</p>
+            <h3>Packed cold, shipped fast.</h3>
+            <p>Orders ship from <span class="tag">City, ST</span> within <span class="tag">1 business day</span>. Domestic US only.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Company statement -->
+    <section class="statement">
+      <div class="wrap statement-inner">
+        <svg class="statement__mark" aria-hidden="true"><use href="#mark" /></svg>
+        <p>Merridian Research Co. supplies research peptides to laboratories and independent researchers. Each lot is documented, tested by a third party, and labeled with its batch. <span class="tag tag--light">Placeholder copy</span></p>
+        <a class="btn btn--light" href="#about" data-demo-page="About">About Merridian</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <div class="footer-top">
+        <a class="brand brand--footer" href="#top" aria-label="Merridian Research Co. home">
+          <svg class="brand__mark" aria-hidden="true"><use href="#mark" /></svg>
+          <span class="brand__type">
+            <span class="brand__name">MERRIDIAN</span>
+            <span class="brand__sub">RESEARCH CO.</span>
+          </span>
+        </a>
+        <nav class="footer-nav" aria-label="Footer">
+          <div>
+            <p class="mono">Shop</p>
+            <a href="#featured">All compounds</a>
+            <a href="#spotlight">Peptides</a>
+            <a href="#spotlight">Blends</a>
+          </div>
+          <div>
+            <p class="mono">Company</p>
+            <a href="#testing" data-demo-page="Lab testing">Lab testing</a>
+            <a href="#about" data-demo-page="About">About</a>
+            <a href="#faq" data-demo-page="FAQ">FAQ</a>
+            <a href="#contact" data-demo-page="Contact">Contact</a>
+          </div>
+          <div>
+            <p class="mono">Policies</p>
+            <a href="#terms" data-demo-page="Terms of sale">Terms of sale</a>
+            <a href="#privacy" data-demo-page="Privacy">Privacy</a>
+            <a href="#shipping" data-demo-page="Shipping &amp; returns">Shipping &amp; returns</a>
+            <a href="#ruo" data-demo-page="Research-use policy">Research-use policy</a>
+          </div>
+        </nav>
+      </div>
+      <div class="notices">
+        <p><strong>Research use only.</strong> All products sold by Merridian Research Co. are intended solely for laboratory research. They are not for human or veterinary use, and not for use as a drug, food, cosmetic, or household product.</p>
+        <p>These products have not been evaluated by the Food and Drug Administration and are not intended to diagnose, treat, cure, or prevent any disease.</p>
+      </div>
+      <div class="footer-base mono">
+        <span>© 2026 Merridian Research Co.</span>
+        <span>Demo preview by CKV Media · Not a live store</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Mobile menu -->
+  <div class="menu-panel" data-panel="menu" hidden>
+    <nav aria-label="Mobile">
+      <a href="#featured">Shop all</a>
+      <a href="#spotlight">Peptides</a>
+      <a href="#spotlight">Blends</a>
+      <a href="#testing">Lab testing</a>
+      <a href="#account" data-demo-page="Account">Account</a>
+    </nav>
+  </div>
+
+  <!-- Search -->
+  <div class="overlay" data-panel="search" hidden>
+    <div class="search-box" role="dialog" aria-modal="true" aria-label="Search products">
+      <label class="search-field">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="M16 16l4.5 4.5" /></svg>
+        <span class="sr-only">Search compounds</span>
+        <input type="search" placeholder="Search compounds — try “bpc157”" autocomplete="off" data-search-input />
+        <button type="button" class="icon-btn" data-close aria-label="Close search">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+        </button>
+      </label>
+      <ul class="search-results" data-search-results></ul>
+    </div>
+  </div>
+
+  <!-- Cart drawer -->
+  <div class="drawer-scrim" data-panel="cart" hidden>
+    <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="cart-title">
+      <header class="drawer-head">
+        <h2 id="cart-title">Cart <span class="mono" data-cart-count-label></span></h2>
+        <button type="button" class="icon-btn" data-close aria-label="Close cart">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+        </button>
+      </header>
+      <div class="ship-meter" data-ship-meter></div>
+      <ul class="cart-lines" data-cart-lines></ul>
+      <div class="cart-empty" data-cart-empty>
+        <p>Your cart is empty.</p>
+        <button type="button" class="btn btn--ghost" data-mock-order>Load a sample order</button>
+      </div>
+      <footer class="drawer-foot" data-cart-foot>
+        <form class="discount" data-discount>
+          <label class="sr-only" for="code">Discount code</label>
+          <input id="code" class="mono" placeholder="Discount code (try DEMO10)" />
+          <button class="btn btn--small" type="submit">Apply</button>
+        </form>
+        <dl class="totals mono">
+          <div><dt>Subtotal</dt><dd data-subtotal></dd></div>
+          <div data-discount-row hidden><dt>Discount</dt><dd data-discount-amt></dd></div>
+          <div><dt>Shipping</dt><dd data-shipping></dd></div>
+          <div class="total"><dt>Total</dt><dd data-total></dd></div>
+        </dl>
+        <label class="attest">
+          <input type="checkbox" data-attest />
+          <span>I confirm these products are for laboratory research use only and will not be used on humans or animals.</span>
+        </label>
+        <button class="btn btn--primary btn--block" type="button" data-checkout disabled>Checkout</button>
+        <p class="fine">Demo: checkout hands off to the store back end in the full build.</p>
+      </footer>
+    </aside>
+  </div>
+
+  <!-- Research-use gate -->
+  <div class="gate" data-gate hidden>
+    <div class="gate-card" role="dialog" aria-modal="true" aria-labelledby="gate-title">
+      <svg class="gate__mark" aria-hidden="true"><use href="#mark" /></svg>
+      <p class="gate__word">MERRIDIAN</p>
+      <p class="gate__sub"><span></span>RESEARCH CO.<span></span></p>
+      <h2 id="gate-title">Before you enter</h2>
+      <p>This site sells chemicals for laboratory research only. Please confirm both statements to continue.</p>
+      <label class="check"><input type="checkbox" data-gate-check /> <span>I am 21 years of age or older.</span></label>
+      <label class="check"><input type="checkbox" data-gate-check /> <span>I am purchasing for research purposes only, not for human or animal use.</span></label>
+      <div class="cta-row">
+        <button class="btn btn--primary" type="button" data-gate-enter disabled>Enter</button>
+        <a class="btn btn--ghost" href="https://www.google.com">Leave</a>
+      </div>
+      <p class="fine mono">Demo preview · Age threshold pending counsel</p>
+    </div>
+  </div>
+
+  <div class="toast" role="status" aria-live="polite" data-toast></div>
+
+  <script type="module" src="assets/js/app.js"></script>
+</body>
+</html>
