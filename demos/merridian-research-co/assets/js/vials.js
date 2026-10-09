@@ -88,7 +88,7 @@ function noiseTexture(size = 256, seed = 1) {
 
 // Glass on a transparent canvas: clear face-on, brighter toward the edges
 // (Fresnel), and any reflected highlight is allowed to show at full strength.
-function glassMaterial(side, base) {
+function glassMaterial(side, base, fresW = 0.9, specW = 0.85) {
   const m = new THREE.MeshPhysicalMaterial({
     color: 0xffffff, roughness: 0.04, metalness: 0, transparent: true, side,
     clearcoat: 1, clearcoatRoughness: 0.03, ior: 1.5, specularIntensity: 1,
@@ -100,7 +100,7 @@ function glassMaterial(side, base) {
       `float fres = pow(1.0 - clamp(abs(dot(normalize(-vViewPosition), normal)), 0.0, 1.0), 4.0);
        outgoingLight *= mix(vec3(1.0), vec3(0.86, 0.96, 0.94), fres);
        float spec = smoothstep(0.22, 0.85, luminance(outgoingLight));
-       diffuseColor.a = clamp(${base.toFixed(3)} + fres * 0.9 + spec * 0.85, 0.0, 1.0);
+       diffuseColor.a = clamp(${base.toFixed(3)} + fres * ${fresW.toFixed(2)} + spec * ${specW.toFixed(2)}, 0.0, 1.0);
        #include <opaque_fragment>`
     );
   };
@@ -123,9 +123,12 @@ export function initVials({ canvas, products, featured, spotlight, labelCache, o
   const camera = new THREE.PerspectiveCamera(FOV, 1, 5, 15);
   camera.position.set(0, 0, CAM_Z);
 
-  const key = new THREE.DirectionalLight(0xffffff, 1.25);
+  const key = new THREE.DirectionalLight(0xffffff, 1.6);
   key.position.set(-3, 4, 6);
   scene.add(key);
+  const fill = new THREE.DirectionalLight(0xffffff, 0.55);
+  fill.position.set(3, 0.5, 6);
+  scene.add(fill);
   const rim = new THREE.DirectionalLight(0x58a0f2, 1.1); // node blue, one highlight
   rim.position.set(5, 1, -4);
   scene.add(rim);
@@ -160,7 +163,7 @@ export function initVials({ canvas, products, featured, spotlight, labelCache, o
   hitGeo.translate(0, VIAL_H / 2, 0);
 
   const glassOut = glassMaterial(THREE.FrontSide, 0.0);
-  const glassIn = glassMaterial(THREE.BackSide, 0.0);
+  const glassIn = glassMaterial(THREE.BackSide, 0.0, 0.45, 0.3);
   glassIn.envMapIntensity = 0.9;
   const crimpMat = new THREE.MeshPhysicalMaterial({ color: 0xd2d5da, metalness: 1, roughness: 0.24, anisotropy: 0.7, anisotropyRotation: Math.PI / 2 });
   const stopperMat = new THREE.MeshStandardMaterial({ color: 0x47484c, roughness: 0.75 });
@@ -404,7 +407,8 @@ export function initVials({ canvas, products, featured, spotlight, labelCache, o
       v.product = wanted;
     }
     if (a >= 1) {
-      switchSpin = 0; // `to` is a whole revolution: same pose, reset the number
+      // keep switchSpin as-is (a whole number of turns). Resetting it to 0 made
+      // the smoothed pose chase it back: the "spins, then spins back" bug.
       switchAnim = null;
       if (v.product.id !== wanted.id) startSwitch(now);
     }
@@ -480,6 +484,10 @@ export function initVials({ canvas, products, featured, spotlight, labelCache, o
   const KEYS = ['x', 'y', 'size', 'lie', 'rz', 'spin'];
   function frame(now) {
     if (!running) return;
+    step(now);
+    requestAnimationFrame(frame);
+  }
+  function step(now) {
     const dt = Math.min(0.05, (now - last) / 1000);
     last = now;
     const t = (now - start) / 1000;
@@ -523,9 +531,14 @@ export function initVials({ canvas, products, featured, spotlight, labelCache, o
       firstFrame = false;
       onReady?.();
     }
-    requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
 
+  // ?debug exposes the spec-sheet vial's smoothed spin for testing
+  if (location.search.includes('debug')) {
+    window.__spotSpin = () => state[SPOT]?.spin;
+    // step frames by hand (rAF is paused while the tab is hidden)
+    window.__tick = (n = 120) => { for (let i = 0; i < n; i++) { last -= 16; step(performance.now() + i * 16); } };
+  }
   return { switchTo };
 }
