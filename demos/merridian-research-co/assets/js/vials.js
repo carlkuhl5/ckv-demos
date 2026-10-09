@@ -538,6 +538,8 @@ export function initVials({ canvas, products, featured, spotlight, labelCache, o
   if (location.search.includes('debug')) {
     window.__spotSpin = () => state[SPOT]?.spin;
     // step frames by hand (rAF is paused while the tab is hidden)
+    // render one frame and read it back (used to make the share card)
+    window.__snapshot = () => { step(performance.now()); return canvas.toDataURL('image/png'); };
     window.__tick = (n = 120) => { for (let i = 0; i < n; i++) { last -= 16; step(performance.now() + i * 16); } };
   }
   return { switchTo };
