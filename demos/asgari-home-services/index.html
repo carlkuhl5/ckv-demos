@@ -49,6 +49,15 @@ footer{background:#121a22;color:#9aa8b6;padding:26px 0;font-size:.9rem}
 footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
 footer a{color:#cfd8e1}
 @media(max-width:560px){body{font-size:16px}.hero{padding:48px 0 56px}section{padding:48px 0}.btn{width:100%;text-align:center}header .btn{width:auto}}
+.ph{background:#eee7da;border:2px dashed #c9bda8;border-radius:12px;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;text-align:center;color:#7a6f5e;font-size:.9rem;padding:12px}
+.info{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.info .card p+p{margin-top:6px}
+form.est{background:#fff;border:1px solid #e6dfd3;border-radius:12px;padding:26px;display:grid;gap:14px;max-width:640px;margin:0 auto;text-align:left;color:#1c2733}
+form.est label{font-weight:700;font-size:.95rem;display:grid;gap:5px}
+form.est input,form.est select,form.est textarea{font:inherit;padding:11px;border:1px solid #cfc6b6;border-radius:8px;background:#fff;width:100%}
+form.est .note{font-size:.85rem;color:#52606d}
+.contact h2{margin-bottom:6px}.contact .or{margin-top:26px}
+.rev{text-align:center}.rev p{margin:0 auto 22px}
 </style>
 </head>
 <body>
@@ -67,7 +76,7 @@ footer a{color:#cfd8e1}
   <p>From small fixes around the house to bigger remodeling projects. Call and tell us what you need done.</p>
   <div class="cta">
    <a class="btn" href="tel:+15027514251">Call (502) 751-4251</a>
-   <a class="btn ghost" href="#contact">Ask for an estimate</a>
+   <a class="btn ghost" href="#estimate">Request an estimate</a>
   </div>
  </div>
 </section>
@@ -108,19 +117,53 @@ footer a{color:#cfd8e1}
  </div>
 </section>
 
-<section>
+<section id="gallery" class="alt">
  <div class="wrap">
-  <h2>Where we work</h2>
-  <p class="lead">Louisville, Kentucky. Call to check that your address is in our area.</p>
+  <h2>Our work</h2>
+  <p class="lead">Photos of finished jobs go here, so people can see the quality before they call.</p>
+  <div class="grid">
+   <div class="ph">Job photo<br>(added from your photos)</div>
+   <div class="ph">Job photo<br>(added from your photos)</div>
+   <div class="ph">Job photo<br>(added from your photos)</div>
+  </div>
  </div>
 </section>
 
-<section class="contact" id="contact">
+<section id="area">
  <div class="wrap">
-  <h2>Have a project in mind?</h2>
-  <p>Call us and tell us what you need. We will talk through the job and set up an estimate.</p>
+  <h2>Service area and hours</h2>
+  <p class="lead">Know before you call whether we cover you and when we pick up.</p>
+  <div class="info">
+   <div class="card"><h3>Where we work</h3><p>Louisville, Kentucky.</p><p>Your list of towns and neighborhoods is added here at build.</p></div>
+   <div class="card"><h3>Hours</h3><p>Your working hours are added here at build.</p><p>Until then, call (502) 751-4251.</p></div>
+  </div>
+ </div>
+</section>
+
+<section class="contact" id="estimate">
+ <div class="wrap">
+  <h2>Request an estimate</h2>
+  <p>Tell us about the job and add photos. We will get back to you with next steps.</p>
+  <form class="est" onsubmit="event.preventDefault();this.querySelector('.note').textContent='Demo only: this form is not connected yet. On the live site it goes to your email and your portal.'">
+   <label>Your name<input type="text" name="name" autocomplete="name"></label>
+   <label>Phone<input type="tel" name="phone" autocomplete="tel"></label>
+   <label>What do you need done?<select name="job"><option>Handyman repair</option><option>Remodeling</option><option>Addition</option><option>Something else</option></select></label>
+   <label>Tell us about the job<textarea name="details" rows="4"></textarea></label>
+   <label>Photos of the job<input type="file" name="photos" accept="image/*" multiple></label>
+   <button class="btn" type="submit">Send estimate request</button>
+   <p class="note">Photos help us give you a better first answer.</p>
+  </form>
+  <p class="or">Rather talk? Call now.</p>
   <a class="phone" href="tel:+15027514251">(502) 751-4251</a>
-  <a class="btn" href="tel:+15027514251">Tap to call</a>
+ </div>
+</section>
+
+<section class="rev">
+ <div class="wrap">
+  <h2>Happy with the job?</h2>
+  <p class="lead">A short review helps the next neighbor find us. It takes a minute.</p>
+  <a class="btn dark" href="#top">Leave a Google review</a>
+  <p class="note" style="margin-top:14px;font-size:.88rem;color:#52606d">On the live site, after each job we text or email the customer a link that opens your Google review page.</p>
  </div>
 </section>
 </main>
