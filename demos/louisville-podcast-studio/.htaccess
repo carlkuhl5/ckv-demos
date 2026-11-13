@@ -1,0 +1,9 @@
+# Old Squarespace URLs -> rebuilt site
+RewriteEngine On
+RewriteRule ^book-now/?$ /book/ [R=301,L]
+RewriteRule ^book-now/?$ /book/ [R=301,L]
+RewriteRule ^cart/?$ /book/ [R=301,L]
+RewriteRule ^contact/?$ /book/ [R=301,L]
+RewriteRule ^shop/?$ /memberships/ [R=301,L]
+
+ErrorDocument 404 /404.html

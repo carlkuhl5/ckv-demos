@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /members
+Disallow: /404.html
+
+Sitemap: https://commongroundlou.com/sitemap.xml

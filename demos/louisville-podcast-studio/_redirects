@@ -1,0 +1,10 @@
+# Old Squarespace URLs -> rebuilt site. 301 permanent.
+/book-now                          /book/                     301
+/cart                              /book/                     301
+/contact                           /book/                     301
+/shop                              /memberships/              301
+/blog/running-ads-on-chatgpt-what-businesses-need-to-know-and-how-to-prepare-now /blog/running-ads-on-chatgpt-what-businesses-need-to-know-and-how-to-prepare-now/ 301
+/blog/the-top-10-best-things-to-do-in-louisville-kentucky-for-halloween- /blog/the-top-10-best-things-to-do-in-louisville-kentucky-for-halloween-/ 301
+/blog/louisville-kentucky-social-media-management-how-louisville-podcast-studio-elevates-your-brand /blog/louisville-kentucky-social-media-management-how-louisville-podcast-studio-elevates-your-brand/ 301
+/blog/norton-commons-podcast-studio-is-open-now /blog/norton-commons-podcast-studio-is-open-now/ 301
+/blog/-introducing-the-norton-commons-podcast-studio-at-common-grounds /blog/-introducing-the-norton-commons-podcast-studio-at-common-grounds/ 301
